@@ -12,16 +12,9 @@ class Vec {
   sub(vec) {
     return new Vec(this.x - vec.x, this.y - vec.y);
   }
-}
-
-enemy(color){
-  if(color == "w") {
-    return "b";
+  clone() {
+    return new Vec(this.x, this.y);
   }
-  if(color == "b") {
-    return "w";
-  }
-  return;
 }
 
 class App extends Component {
@@ -42,40 +35,112 @@ class App extends Component {
 
   }
 
+  turn(){
+    return this.state.isWhiteTurn?
+      "w":
+      "b";
+  }
+
+  enemy(){
+    return this.state.isWhiteTurn?
+      "b":
+      "w";
+  }
+
+  copyBoard(){
+    const copy = new Array(8);
+    for(let i = 0; i < 8; ++i) {
+      copy[i] = this.state.board[i].slice();
+    }
+    return copy;
+  }
+
+  genReverseList(i, j){
+    // 8方向のベクトルを作成
+    const vecs = [];
+    for(let i = 0; i < 9; ++i) {
+      vecs[i] = new Vec(i % 3 - 1, Math.floor(i / 3) - 1);
+    }
+    if(this.state.board[j][i] != null) {
+      return;
+    }
+
+    const allReverseList = [];
+
+    for(const vec of vecs) {
+      let place = new Vec(i, j).add(vec);
+      // 場所から状態を取得
+      const getPlace = () => {
+        if(0 > place.y || 8 <= place.y){
+          return;
+        }
+        return this.state.board[place.y][place.x];
+      };
+      // そっちの方向に違う色の石があるか
+      if(getPlace() !== this.enemy()) {
+        continue;
+      }
+      const reverseList = [place.clone()];
+
+      // また違う色の石に当たるまで調べる
+      while(true){
+        place = place.add(vec);
+        if(getPlace() !== this.enemy()) {
+          break;
+        }
+        reverseList.push(place.clone());
+      }
+
+      // その先に自分の色の石があるか？
+      if(getPlace() === this.turn()){
+        Array.prototype.push.apply(allReverseList, reverseList);
+      }
+    }
+
+    if(allReverseList.length === 0) {
+      return;
+    }
+    return allReverseList;
+  }
+
   genPuttable() {
     const puttable = new Array(8);
     for(let i = 0; i < 8; ++i) {
       puttable[i] = new Array(8).fill(false);
     }
 
-    const vecs = [];
-    for(let i = 0; i < 9; ++i) {
-      vecs[i] = new Vec(i % 3 - 1, Math.floor(i / 3) - 1);
-    }
-
     for(let i = 0; i < 8; ++i) {
-      for(let j = 0; j > 8; ++j) {
-        if(this.state.board[j][i] == null) {
-          for(const vec of vecs) {
-            const place = new Vec(i, j).add(vec);
-            // そっちの方向に違う色の石があるか
-            // 盤面のはじ
-            if(this.state.board[j][i] == null) {
-              continue;
-            }
-            if(this.state.board[j][i] === this.state.turn) {
-              continue;
-            }
-
-            while(true){
-              const p = this.state.board[j][i];
-            }
-          }
+      for(let j = 0; j < 8; ++j) {
+        if(this.genReverseList(i, j) != null) {
+          puttable[j][i] = true;
         }
       }
     }
     return puttable;
   }
+
+  handleClick(i, j) {
+    const board = this.copyBoard();
+    board[j][i] = this.turn();
+
+    const reverseList = this.genReverseList(i, j);
+    for(const p of reverseList) {
+      board[p.y][p.x] = this.turn();
+    }
+
+    this.setState({board:board, isWhiteTurn:!this.state.isWhiteTurn});
+
+    if(this.genPuttable() == null) {
+      this.setState({isWhiteTurn: !this.state.isWhiteTurn});
+      if(this.genPuttable() == null) {
+        this.setState({gameSet: true});
+      }
+    }
+
+    return;
+  }
+
+
 
 
 
@@ -87,7 +152,11 @@ class App extends Component {
         {
           this.state.board.map((value, index) => {
             return (
-              <BoardRow value={value} key={"boardRow"+index} puttable={puttable[index]}/>
+              <BoardRow
+                value={value}
+                key={"boardRow"+index}
+                puttable={puttable[index]}
+                onClick={(i) => this.handleClick(i, index)}/>
             );
           })
         }
@@ -97,12 +166,15 @@ class App extends Component {
 }
 
 function BoardRow(props){
-  console.log(props.puttable);
   return (
     <div className="board-row">
       {props.value.map((value, index) => {
         return (
-          <Square value={value} key={"Square"+index} onClick={props.onClick} puttable={props.puttable[index]}/>
+          <Square
+            value={value}
+            key={"Square"+index}
+            onClick={() => {return props.onClick(index)}}
+            puttable={props.puttable[index]}/>
         );
       })}
     </div>
@@ -117,7 +189,10 @@ function Square(props){
           "puttable" :
           ""
       }
-      onClick={props.onClick}>
+      onClick={
+        props.puttable ?
+          props.onClick :
+          () => {}}>
       {props.value == null ?
         "" :
         props.value === "b" ?
