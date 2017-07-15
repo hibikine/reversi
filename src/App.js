@@ -32,14 +32,10 @@ class App extends Component {
     for(let i = 0; i < 8; ++i) {
       board[i] = new Array(8).fill(null);
     }
-    board[0][0] = "w";
-    board[0][1] = "b";
-    board[1][0] = "w";
-    board[1][1] = "b";
     board[3][3] = "w";
     board[4][4] = "w";
-    //board[3][4] = "b";
-    //board[4][3] = "b";
+    board[3][4] = "b";
+    board[4][3] = "b";
     this.state = {
       board: board,
       isWhiteTurn: true,
