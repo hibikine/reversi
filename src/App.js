@@ -154,20 +154,64 @@ class App extends Component {
     return;
   }
 
+  showWinPlayer(){
+    let w = 0;
+    let b = 0;
+
+    for(const row of this.state.board){
+      for(const square of row) {
+        if(square === "w"){
+          w++;
+        }
+        if(square === "b"){
+          b++;
+        }
+      }
+    }
+    if(w > b) {
+      return "White";
+    }
+    if(b > w) {
+      return "Black";
+    }
+    return;
+  }
+
   render() {
     const puttable = this.genPuttable() || genBoard();
     return (
       <div className="App">
+        <h1>Reversi</h1>
+        <main>
+          <div className="board">
+            {
+              this.state.board.map((value, index) => {
+                return (
+                  <BoardRow
+                    value={value}
+                    key={"boardRow"+index}
+                    puttable={puttable[index]}
+                    onClick={(i) => this.handleClick(i, index)}/>
+                );
+              })
+            }
+          </div>
+        </main>
         {
-          this.state.board.map((value, index) => {
-            return (
-              <BoardRow
-                value={value}
-                key={"boardRow"+index}
-                puttable={puttable[index]}
-                onClick={(i) => this.handleClick(i, index)}/>
-            );
-          })
+          (() => {
+            if(this.state.gameSet) {
+              const winPlayer = this.showWinPlayer();
+              return (
+                <div>
+                  {
+                    winPlayer == null ?
+                      "Even" :
+                      winPlayer + " Win!"
+                  }
+                </div>
+              )
+            }
+          })()
         }
       </div>
     );

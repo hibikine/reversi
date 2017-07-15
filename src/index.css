@@ -29,3 +29,8 @@ button{
 .puttable{
   background: #ff5;
 }
+
+main{
+  display: flex;
+  justify-content: center;
+}
