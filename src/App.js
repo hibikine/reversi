@@ -17,6 +17,14 @@ class Vec {
   }
 }
 
+function genBoard(){
+  const board = new Array(8);
+  for(let i = 0; i < 8; ++i) {
+   board[i] = new Array(8).fill(null);
+  }
+  return board;
+}
+
 class App extends Component {
   constructor(){
     super();
@@ -24,10 +32,14 @@ class App extends Component {
     for(let i = 0; i < 8; ++i) {
       board[i] = new Array(8).fill(null);
     }
+    board[0][0] = "w";
+    board[0][1] = "b";
+    board[1][0] = "w";
+    board[1][1] = "b";
     board[3][3] = "w";
     board[4][4] = "w";
-    board[3][4] = "b";
-    board[4][3] = "b";
+    //board[3][4] = "b";
+    //board[4][3] = "b";
     this.state = {
       board: board,
       isWhiteTurn: true,
@@ -35,14 +47,14 @@ class App extends Component {
 
   }
 
-  turn(){
-    return this.state.isWhiteTurn?
+  turn(turn = this.state.isWhiteTurn){
+    return turn?
       "w":
       "b";
   }
 
-  enemy(){
-    return this.state.isWhiteTurn?
+  enemy(turn = this.state.isWhiteTurn){
+    return turn?
       "b":
       "w";
   }
@@ -55,13 +67,13 @@ class App extends Component {
     return copy;
   }
 
-  genReverseList(i, j){
+  genReverseList(i, j, board = this.state.board, turn = this.state.isWhiteTurn){
     // 8方向のベクトルを作成
     const vecs = [];
     for(let i = 0; i < 9; ++i) {
       vecs[i] = new Vec(i % 3 - 1, Math.floor(i / 3) - 1);
     }
-    if(this.state.board[j][i] != null) {
+    if(board[j][i] != null) {
       return;
     }
 
@@ -74,10 +86,10 @@ class App extends Component {
         if(0 > place.y || 8 <= place.y){
           return;
         }
-        return this.state.board[place.y][place.x];
+        return board[place.y][place.x];
       };
       // そっちの方向に違う色の石があるか
-      if(getPlace() !== this.enemy()) {
+      if(getPlace() !== this.enemy(turn)) {
         continue;
       }
       const reverseList = [place.clone()];
@@ -85,14 +97,14 @@ class App extends Component {
       // また違う色の石に当たるまで調べる
       while(true){
         place = place.add(vec);
-        if(getPlace() !== this.enemy()) {
+        if(getPlace() !== this.enemy(turn)) {
           break;
         }
         reverseList.push(place.clone());
       }
 
       // その先に自分の色の石があるか？
-      if(getPlace() === this.turn()){
+      if(getPlace() === this.turn(turn)){
         Array.prototype.push.apply(allReverseList, reverseList);
       }
     }
@@ -103,20 +115,22 @@ class App extends Component {
     return allReverseList;
   }
 
-  genPuttable() {
+  genPuttable(board, turn = this.state.isWhiteTur) {
     const puttable = new Array(8);
     for(let i = 0; i < 8; ++i) {
       puttable[i] = new Array(8).fill(false);
     }
+    let isPuttable = false;
 
     for(let i = 0; i < 8; ++i) {
       for(let j = 0; j < 8; ++j) {
-        if(this.genReverseList(i, j) != null) {
+        if(this.genReverseList(i, j, board, turn) != null) {
           puttable[j][i] = true;
+          isPuttable = true;
         }
       }
     }
-    return puttable;
+    return isPuttable ? puttable : undefined;
   }
 
   handleClick(i, j) {
@@ -130,9 +144,9 @@ class App extends Component {
 
     this.setState({board:board, isWhiteTurn:!this.state.isWhiteTurn});
 
-    if(this.genPuttable() == null) {
-      this.setState({isWhiteTurn: !this.state.isWhiteTurn});
-      if(this.genPuttable() == null) {
+    if(this.genPuttable(board, !this.state.isWhiteTurn) == null) {
+      this.setState({isWhiteTurn: this.state.isWhiteTurn});
+      if(this.genPuttable(board, this.state.isWhiteTurn) == null) {
         this.setState({gameSet: true});
       }
     }
@@ -140,13 +154,8 @@ class App extends Component {
     return;
   }
 
-
-
-
-
-
   render() {
-    const puttable = this.genPuttable();
+    const puttable = this.genPuttable() || genBoard();
     return (
       <div className="App">
         {
