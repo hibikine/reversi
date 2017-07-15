@@ -1,22 +1,41 @@
 import React, { Component } from 'react';
 import './App.css';
 
+/**
+ * ベクトルクラス
+ */
 class Vec {
   constructor(x = 0, y = 0){
     this.x = x;
     this.y = y;
   }
+
+  /**
+   * 加算
+   */
   add(vec) {
     return new Vec(this.x + vec.x, this.y + vec.y);
   }
+
+  /**
+   * 減算
+   */
   sub(vec) {
     return new Vec(this.x - vec.x, this.y - vec.y);
   }
+
+  /**
+   * 複製
+   */
   clone() {
     return new Vec(this.x, this.y);
   }
 }
 
+/**
+ * 盤面をgenerateする
+ * @return {Array} 8x8のundefinedな2次元配列
+ */
 function genBoard(){
   const board = new Array(8);
   for(let i = 0; i < 8; ++i) {
@@ -28,10 +47,7 @@ function genBoard(){
 class App extends Component {
   constructor(){
     super();
-    const board = new Array(8);
-    for(let i = 0; i < 8; ++i) {
-      board[i] = new Array(8).fill(null);
-    }
+    const board = genBoard();
     board[3][3] = "w";
     board[4][4] = "w";
     board[3][4] = "b";
@@ -55,6 +71,10 @@ class App extends Component {
       "w";
   }
 
+  /**
+   * 盤面の配列を複製する
+   * @return {Array}
+   */
   copyBoard(){
     const copy = new Array(8);
     for(let i = 0; i < 8; ++i) {
