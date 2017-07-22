@@ -1,36 +1,8 @@
 import React, { Component } from 'react';
+import Board from './Board';
 import './App.css';
+import Vec from './Vec';
 
-/**
- * ベクトルクラス
- */
-class Vec {
-  constructor(x = 0, y = 0){
-    this.x = x;
-    this.y = y;
-  }
-
-  /**
-   * 加算
-   */
-  add(vec) {
-    return new Vec(this.x + vec.x, this.y + vec.y);
-  }
-
-  /**
-   * 減算
-   */
-  sub(vec) {
-    return new Vec(this.x - vec.x, this.y - vec.y);
-  }
-
-  /**
-   * 複製
-   */
-  clone() {
-    return new Vec(this.x, this.y);
-  }
-}
 
 /**
  * 盤面をgenerateする
@@ -193,82 +165,50 @@ class App extends Component {
     return;
   }
 
+  renderWinner() {
+    if (this.state.gameSet) {
+      const winPlayer = this.showWinPlayer();
+      return (
+        <div>
+          {
+            winPlayer == null ?
+              "Even" :
+              winPlayer + " Win!"
+          }
+        </div>
+      )
+    }
+  }
+
+  renderTurn() {
+    if (!this.state.gameSet) {
+      return (
+        <div>{
+          this.state.isWhiteTurn ?
+            "○ turn" :
+            "● turn"
+        }</div>
+      )
+    }
+  }
+
   render() {
     const puttable = this.genPuttable() || genBoard();
     return (
       <div className="App">
         <h1>Reversi</h1>
         <main>
-          <div className="board">
-            {
-              this.state.board.map((value, index) => {
-                return (
-                  <BoardRow
-                    value={value}
-                    key={"boardRow"+index}
-                    puttable={puttable[index]}
-                    onClick={(i) => this.handleClick(i, index)}/>
-                );
-              })
-            }
-          </div>
+          <Board
+            board={this.state.board}
+            onClick={(i, j) => this.handleClick(i, j)}
+            puttable={puttable}/>
         </main>
-        {
-          (() => {
-            if(this.state.gameSet) {
-              const winPlayer = this.showWinPlayer();
-              return (
-                <div>
-                  {
-                    winPlayer == null ?
-                      "Even" :
-                      winPlayer + " Win!"
-                  }
-                </div>
-              )
-            }
-          })()
-        }
+        { this.renderTurn() }
+        { this.renderWinner() }
       </div>
     );
   }
 }
 
-function BoardRow(props){
-  return (
-    <div className="board-row">
-      {props.value.map((value, index) => {
-        return (
-          <Square
-            value={value}
-            key={"Square"+index}
-            onClick={() => {return props.onClick(index)}}
-            puttable={props.puttable[index]}/>
-        );
-      })}
-    </div>
-  )
-}
-
-function Square(props){
-  return (
-    <button
-      className={
-        props.puttable ?
-          "puttable" :
-          ""
-      }
-      onClick={
-        props.puttable ?
-          props.onClick :
-          () => {}}>
-      {props.value == null ?
-        "" :
-        props.value === "b" ?
-        "●" :
-        "○"}
-    </button>
-  )
-}
 
 export default App;
