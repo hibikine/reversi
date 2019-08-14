@@ -5,8 +5,8 @@
   "homepage": "https://hibikinekage.github.io/reversi/",
   "dependencies": {
     "gh-pages": "^2.0.1",
-    "react": "^15.6.2",
-    "react-dom": "^15.6.1",
+    "react": "^16.9.0",
+    "react-dom": "^16.9.0",
     "react-redux": "^5.1.1",
     "react-scripts": "3.1.1",
     "redux": "^3.7.2"
