@@ -4,12 +4,12 @@
   "private": true,
   "homepage": "https://hibikinekage.github.io/reversi/",
   "dependencies": {
-    "gh-pages": "^2.0.1",
+    "gh-pages": "^2.1.1",
     "react": "^15.6.2",
-    "react-dom": "^15.6.1",
+    "react-dom": "^15.6.2",
     "react-redux": "^5.1.2",
     "react-scripts": "3.1.1",
-    "redux": "^3.7.2"
+    "redux": "^4.0.4"
   },
   "scripts": {
     "start": "react-scripts start",
